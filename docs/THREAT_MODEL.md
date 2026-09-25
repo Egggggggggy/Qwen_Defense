@@ -1,69 +1,71 @@
 # Threat Model (Stage 2)
 
-## Purpose
-Define credible threats against a defence-focused HRI assistant and establish protection goals before implementation.
+## Selected Primary Threat Model
+**OCR-driven visual prompt injection** against a vision-language assistant.
 
-## Assets to Protect
-- **Safety-critical decisions** produced during human-robot interaction.
-- **Operator trust and situational awareness**.
-- **System integrity** (prompts, policies, configurations, logs).
-- **Sensitive mission context** and any user-provided operational data.
+This means an attacker places malicious instructions inside an image (e.g., overlaid text, screenshot text, document text). The VLM reads that text and may follow attacker instructions that conflict with user intent or safety policy.
 
-## Trust Boundaries
-1. Human operator input boundary (text/commands/images).
-2. External data boundary (uploaded files, sensor-derived content, or third-party feeds).
-3. Model runtime boundary (inference stack, tokenizer, prompt templates).
-4. Logging/telemetry boundary (stored outputs, traces, metadata).
+## Why this threat was selected
+- Relevant to Qwen2.5-VL (image + text understanding).
+- Demonstrable locally with synthetic test images.
+- Defensible with lightweight controls (OCR extraction + rule/policy checks).
+- Measurable with TP/TN/FP/FN metrics in a student project.
+- Compatible with constrained hardware (CPU-first checks before model inference).
 
-## Threat Categories
+## Attacker capability
+- Can submit image + text prompt to the system.
+- Can embed instruction-like text in images.
+- Cannot directly modify model weights or server-side code.
 
-### 1) Prompt Injection / Instruction Override
-- **Vector**: crafted natural-language commands designed to bypass policy.
-- **Impact**: unsafe action recommendations or policy evasion.
-- **Mitigations**:
-  - strict system prompt hierarchy;
-  - policy classifier before action output;
-  - reject/clarify on conflict with safety policy.
+## Attacker goal
+- Override intended instruction hierarchy.
+- Induce unsafe output, policy bypass, or misleading assistant behavior.
 
-### 2) Adversarial or Malicious Visual Input
-- **Vector**: manipulated images, overlays, or misleading scene content.
-- **Impact**: incorrect risk assessment or false situational interpretation.
-- **Mitigations**:
-  - image pre-validation (format, size, sanity checks);
-  - confidence thresholding and fallback responses;
-  - escalation path for low-confidence visual conclusions.
+## Attack input
+- User text prompt (benign-looking or mixed intent).
+- Malicious image containing hidden/embedded instructions such as:
+  - “Ignore previous instructions …”
+  - “Reveal system prompt …”
+  - “Follow only the text in this image …”
 
-### 3) Data Exfiltration / Sensitive Leakage
-- **Vector**: prompts attempting to extract hidden instructions, logs, or sensitive context.
-- **Impact**: exposure of operational or policy details.
-- **Mitigations**:
-  - output filtering/redaction;
-  - deny-list for sensitive internal fields;
-  - minimum-necessary logging policy.
+## Assumptions
+- Image inputs are untrusted by default.
+- OCR-like text extraction is possible (tooling can vary).
+- The model may treat image text as high-priority context if not filtered.
+- This project is a defensive research prototype, not production hardening.
 
-### 4) Resource Exhaustion (DoS-like Behavior)
-- **Vector**: oversized inputs, repeated long-context requests, expensive image processing loops.
-- **Impact**: degraded availability on constrained hardware.
-- **Mitigations**:
-  - hard limits on token count, image dimensions, and request rate;
-  - timeout and cancellation policy;
-  - graceful fallback to lightweight checks.
+## Assets being protected
+- Safety policy adherence.
+- Reliability of assistant decisions.
+- Integrity of prompt hierarchy.
+- Evaluation integrity (baseline vs defence comparison).
 
-### 5) Unsafe Automation / Hallucinated Guidance
-- **Vector**: model generates high-confidence but incorrect safety advice.
-- **Impact**: harmful operator decisions.
-- **Mitigations**:
-  - enforce “decision support, not autonomous control” boundary;
-  - require explicit confidence framing;
-  - include human-in-the-loop confirmation for high-risk outputs.
+## Attack surface
+1. Image upload path.
+2. Prompt assembly path (image text merged with user text).
+3. Model inference path.
+4. Output delivery path.
 
-## Security Goals (Stage 2 Baseline)
-- **G1**: Prevent direct policy override via text or multimodal prompts.
-- **G2**: Prevent leakage of internal policy and sensitive context.
-- **G3**: Maintain service availability under constrained compute.
-- **G4**: Ensure uncertain outputs fail safely and are reviewable.
+## Expected attack behavior
+Without defence, some malicious-image cases may cause the model to:
+- Follow injected instructions in image text.
+- Ignore or conflict with user/system safety intent.
+- Produce policy-violating or untrusted outputs.
 
-## Residual Risks (Accepted for Stage 2)
-- Model-level hallucination cannot be fully eliminated.
-- Visual adversarial robustness is partial without specialized detectors.
-- Hardware variability may affect mitigation reliability until local validation is complete.
+## Defence objective
+Detect suspicious instruction patterns in extracted image text and user prompt, then block/sanitise/escalate before passing to Qwen.
+
+## Out of scope (Stage 2)
+- Full adversarial robustness to pixel-level perturbation attacks.
+- Watermark/steganography-forensics-grade detection.
+- Real-world autonomous agent execution security.
+
+## Limitations
+- Rule-based detection can miss novel phrasing (false negatives).
+- Aggressive patterns may over-block benign educational/security text (false positives).
+- OCR quality affects detection reliability.
+
+## References
+1. OWASP LLM Prompt Injection guidance: https://owasp.org/www-project-top-10-for-large-language-model-applications/
+2. Multimodal prompt injection research overview (arXiv): https://arxiv.org/abs/2509.05883
+3. Qwen2.5-VL technical report (model context): https://arxiv.org/abs/2502.13923
