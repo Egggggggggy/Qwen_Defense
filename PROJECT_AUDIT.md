@@ -1,71 +1,89 @@
-# PROJECT AUDIT (Stage 1)
+# PROJECT_AUDIT (Stage 1)
 
 ## Detected Environment
 - Audit timestamp (UTC): 2026-09-25
-- Workspace path: `/home/runner/work/Qwen_Defense/Qwen_Defense`
-- Operating system (detected): `Linux 6.17.0-1022-azure` (sandbox)
-- User target hardware in issue statement: Windows laptop with Intel i7-1165G7, 16 GB RAM, NVIDIA MX330 (2 GB VRAM)
+- Workspace: `/home/runner/work/Qwen_Defense/Qwen_Defense`
+- Detected OS in this execution environment: Linux (`6.17.0-1022-azure`)
+- User-declared target machine: Windows laptop (i7-1165G7, 16 GB RAM, NVIDIA MX330 2 GB VRAM)
 
 ## Existing Project Structure
-Current repository is minimal:
-- `.git/` (Git initialized)
+Current repository contains:
+- `.git/`
 - `README.md`
+- `PROJECT_AUDIT.md`
+- `docs/`
+  - `docs/QWEN_OVERVIEW.md`
+  - `docs/THREAT_MODEL.md`
+  - `docs/DEFENCE_RESEARCH.md`
 
-No `src/`, `tests/`, `docs/`, `scripts/`, `data/`, or `results/` directories exist yet.
+Not yet present: `src/`, `scripts/`, `tests/`, `data/`, `results/`, `.vscode/`, `requirements.txt`, `.gitignore`.
 
-## Relevant Files Found
+## Relevant Files
 - `/home/runner/work/Qwen_Defense/Qwen_Defense/README.md`
+- `/home/runner/work/Qwen_Defense/Qwen_Defense/PROJECT_AUDIT.md`
+- `/home/runner/work/Qwen_Defense/Qwen_Defense/docs/QWEN_OVERVIEW.md`
+- `/home/runner/work/Qwen_Defense/Qwen_Defense/docs/THREAT_MODEL.md`
+- `/home/runner/work/Qwen_Defense/Qwen_Defense/docs/DEFENCE_RESEARCH.md`
 - `/home/runner/work/Qwen_Defense/Qwen_Defense/.git/config`
 
 ## Git Status
-- Repository initialized: **Yes**
-- Current branch: `copilot/create-defence-system-qwen25`
-- Remote configured: **Yes** (`origin` present)
-- Working tree changes before audit file creation: clean
+- Git initialized: **Yes**
+- Current branch: `copilot/build-defence-system-qwen2-5`
+- Remote configured: **Yes** (`origin`)
+- Working tree state at audit: clean (before this file update)
 
 ## Python Version
-- Python: `3.12.3` (`/usr/bin/python`)
+- Python: `3.12.3`
+- Python path: `/usr/bin/python`
+
+## Existing Virtual Environments
+- No `.venv/`, `venv/`, `env/`, or `.conda/` directory detected in repository.
+
+## Existing Configuration / Dependency Files
+- No `requirements*.txt`, `pyproject.toml`, `setup.py`, `setup.cfg`, or `environment.yml` detected.
+
+## Existing Python Source Files
+- No `.py` files currently detected in repository.
 
 ## PyTorch / Transformers Status
-Module availability check:
-- `torch`: **NOT FOUND**
-- `transformers`: **NOT FOUND**
-- `accelerate`: **NOT FOUND**
-- `PIL` (Pillow): **NOT FOUND**
-- `psutil`: **NOT FOUND**
-- `pytest`: **NOT FOUND**
+Import checks in current environment:
+- `torch`: **NOT INSTALLED**
+- `transformers`: **NOT INSTALLED**
+- `accelerate`: **NOT INSTALLED**
+- `PIL` (Pillow): **NOT INSTALLED**
+- `psutil`: **NOT INSTALLED**
+- `pytest`: **NOT INSTALLED**
 
 ## CUDA Status
-- `nvidia-smi`: command not found
-- `nvcc`: command not found
-- CUDA availability via PyTorch: cannot be tested yet (PyTorch not installed)
+- `nvidia-smi`: not available in this environment
+- `nvcc`: not available in this environment
+- PyTorch CUDA check: cannot run (PyTorch not installed)
 
 ## GPU Status
-- NVIDIA driver visibility in this sandbox: **not detected** via `nvidia-smi`
-- MX330 visibility to PyTorch: **cannot determine in current state** (no PyTorch installed; Linux sandbox differs from target Windows machine)
+- No NVIDIA GPU visibility from this sandbox via `nvidia-smi`.
+- MX330 visibility to PyTorch: cannot be verified here.
+- Important: this is a Linux cloud sandbox, so GPU results here do **not** confirm your local Windows MX330 state.
 
-## Memory / Storage Snapshot (Sandbox)
-- System RAM: ~15 GiB total, ~13 GiB available at audit time
-- Disk: ~144.26 GiB total, ~84.49 GiB free
-
-## CI / Build Observation
-- GitHub Actions recent run checked (`Running Copilot cloud agent`): currently in progress
-- Failed jobs query: **0 failed jobs** in current run
+## System Memory / Storage Snapshot (Sandbox)
+- RAM: ~15 GiB total, ~13 GiB available at check time
+- Disk (`/`): ~145 GiB total, ~85 GiB available
 
 ## Identified Problems
-1. Repository scaffold is not yet present for the requested defence project.
-2. No Python ML/security dependencies are installed.
-3. GPU/CUDA status for target MX330 cannot be validated from this sandbox environment.
-4. No test framework/configuration exists yet.
+1. Repository is only partially scaffolded for the requested project.
+2. No Python implementation files exist yet.
+3. Core dependencies for Qwen/defence pipeline are not installed.
+4. CUDA/GPU capability for your local MX330 cannot be validated from this sandbox.
+5. No requirements or reproducible environment config is defined yet.
 
-## Recommended Next Steps (Stage 2 onward)
-1. Create documentation-first research artifacts (`docs/QWEN_OVERVIEW.md`, `docs/THREAT_MODEL.md`, `docs/DEFENCE_RESEARCH.md`) without large downloads.
-2. Define a hardware-aware execution strategy prioritizing CPU-first inference with optional low-memory settings.
-3. Add minimal project skeleton (`src/`, `scripts/`, `tests/`, `results/`) incrementally.
-4. Add `scripts/setup_check.py` early to verify local Windows environment and MX330 visibility once dependencies are installed.
-5. Defer any large model downloads until architecture and threat model are finalized and user confirms.
+## Recommended Next Steps
+1. Proceed to Stage 2 documentation validation/update (Qwen overview, threat model, defence research) and align with official sources.
+2. Define the single primary threat model explicitly for local demonstration.
+3. Design hardware-aware architecture (CPU-first, optional constrained offload).
+4. Add minimal scaffold (`src/`, `scripts/`, `tests/`, `results/`) before implementation.
+5. Implement `scripts/setup_check.py` early to verify actual Windows MX330/CUDA/PyTorch state on your machine.
+6. Defer large model downloads until hardware strategy and baseline script design are finalized and approved.
 
 ## Hardware Feasibility (Preliminary)
-- Given 2 GB VRAM, full GPU-resident inference for Qwen2.5-VL-3B-Instruct is unlikely to be practical.
-- Most realistic path is expected to be CPU-first or mixed/offloaded inference with strict memory controls and possibly quantized loading if supported by the exact model/runtime stack.
-- Final feasibility must be validated on the user’s actual Windows machine after environment setup.
+- With 2 GB VRAM, full GPU-resident Qwen2.5-VL-3B-Instruct inference is unlikely.
+- Most realistic path is CPU-first inference, with strict memory controls and optional low-memory quantized/offload options if supported by the final stack.
+- Final feasibility must be validated on your real Windows machine (not this sandbox).
